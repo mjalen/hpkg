@@ -6,12 +6,12 @@ A hacky package fetcher using the git shell client.
 * Why?
 I am new to Common Lisp and my Quicklisp install does not like me. Thus, I decided to write a very limited, very /hacky/ way to fetch package repositories that I need for other projects. It is /very/ terrible, but it works for my purposes as is.
 * Disclaimer
-This project is *very* buggy. Use at your own risk!
+This toy project is *very* buggy. Use at your own risk!
 * Usage
-Currently there is some boilerplate to using this package. See the test file for an example usage of the popular [[https://alexandria.common-lisp.dev/][Alexandria]] package. Or, see the following.
+Currently there is some boilerplate to using this package.
 
 #+begin_src common-lisp
-  (load "../hpkg.asd") ; Load the system file.
+  (load "hpkg.asd") ; Load the object file. Needed if HPKG is not located in ASDF's default object directory
   (asdf:load-system :hpkg) ; Load hpkg system.
 
   ;;; Define a batch of dependencies as pairs.
@@ -20,4 +20,21 @@ Currently there is some boilerplate to using this package. See the test file for
 
   ;;; Load the dependency and use!
   (asdf:load-system :alexandria)
+#+end_src
+
+Alternatively, you may add dependencies to your ASDF system!
+
+#+begin_src common-lisp
+  ;;; In 'testsystem.asd' file...
+  (load "hpkg.asd")
+  (asdf:load-system :hpkg)
+
+  (hpkg:batch-remote
+   (:alexandria "https://gitlab.common-lisp.net/alexandria/alexandria"))
+
+  (defsystem #:testsystem
+    ; ...system config...
+    :depends-on (:alexandria)
+    ; ...more system config...
+    )
 #+end_src
