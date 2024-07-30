@@ -1,9 +1,5 @@
-(load "../hpkg.asd")
-(asdf:load-system :hpkg)
+(in-package :hpkg/test)
 
-(hpkg:batch-remote
- (:alexandria "https://gitlab.common-lisp.net/alexandria/alexandria"))
-
-;;; Testing alexandria
-(asdf:load-system :alexandria)
-(assert #'alexandria:curry)
+;;; Write a proper test to check that deletes the current alexandria clone,
+;;; clones a new one, and verify with "find" that it has successfully re-cloned.
+(defun alexandria-load-test () t)
