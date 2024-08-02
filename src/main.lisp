@@ -1,12 +1,10 @@
 (in-package :hpkg)
 
-"Perhaps create a repository class to allow projects to define their own local repos in a project build dir?"
+(defparameter *default-destination* (uiop:native-namestring
+                                     (uiop:merge-pathnames* #p".local/share/common-lisp/source/" #p"~/" )))
 
 (defgeneric print-repo (repository)
   (:documentation "Helper function for viewing dependency package list."))
-
-(defgeneric force-clean-clone (repository)
-  (:documentation "Forcefully remove target directory and clone all dependencies in repository."))
 
 (defclass hpkg-repository ()
   ((dependency-list :initarg :dependency-list :accessor hpkg-repository-dependency-list)
@@ -16,10 +14,6 @@
   (loop :for dpd :in (hpkg-repository-dependency-list repository)
         :do (format t "~a: ~a~%" (first dpd) (second dpd))))
 
-(defmethod force-clean-clone ((repository hpkg-repository))
-  (format t "Another hi~%"))
-
-(defparameter *default-destination* (uiop:merge-pathnames* #p".local/share/common-lisp/source/" #p"~/" ))
 
 (defun is-dependency-installed (dependency &key (dest *default-destination*))
   (let ((result (uiop:run-program `("find" ,dest "-name" ,(string (car dependency)))
@@ -41,6 +35,7 @@
 
 (defun get-remote (dependency &key (dest *default-destination*) debug)
   "Clone the given remote asdf system. Clones to '~/.local/share/common-lisp/source/' by default."
+  (uiop:ensure-pathname dest :ensure-directories-exist t)
   (let ((dpd-path (uiop:merge-pathnames* (car dependency) dest)))
     (format t "~a~%" dpd-path)
     (if (not (uiop:directory-exists-p dpd-path))
@@ -58,7 +53,9 @@
      ,@(loop :for dpd :in dependency-list
              :collect `(get-remote ',dpd :debug t))))
 
-; (get-remote '("alexandria/" "https://gitlab.common-lisp.net/alexandria/alexandria") :debug t)
+(get-remote '("alexandria/" "https://gitlab.common-lisp.net/alexandria/alexandria")
+            :dest (uiop:merge-pathnames* "target/") :debug t) ; Works correctly. Clones to $CWD/target/alexandria/
+
 ;
 ;
 ;             :dest (uiop:merge-pathnames* #p"foo/"))
